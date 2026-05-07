@@ -1,0 +1,152 @@
+
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="search1.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <div class="brand">
+        <span class="brand__dot" aria-hidden="true"></span>
+        <span class="brand__text">School</span>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav__item" href="#">Home</a>
+        <a class="nav__item" href="#">Students</a>
+          <a class="nav__item" href="#">results</a>
+            <a class="nav__item" href="#">subject</a>
+        <a class="nav__item nav__item--active" href="#" aria-current="page">Search</a>
+        <a class="nav__item" href="#">Rankings</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page">
+    <h1 class="pageTitle">Search</h1>
+    <p class="pageSubtitle">Search for students, subjects and view results</p>
+
+    <section class="card">
+      <div class="tabs">
+        <div class="tabs__rail" role="tablist" aria-label="Search tabs">
+          <button class="tab tab--active" type="button" data-tab="students">Students</button>
+          <button class="tab" type="button" data-tab="subjects">Subjects</button>
+          <button class="tab" type="button" data-tab="results">Results</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section__title">
+          <span class="section__titleIcon" aria-hidden="true">⌕</span>
+          <span id="titleText">Search for a Student</span>
+        </h2>
+        <p class="section__hint" id="hintText">Search by code, last name, first name or major...</p>
+
+        <form class="searchRow" id="searchForm" autocomplete="off">
+          <input class="input" id="q" placeholder="Enter code, last name, first name or major..." />
+          <button class="btn btn--accent" type="submit" aria-label="Search">
+            <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="white" stroke-width="2"/>
+              <path d="M16.5 16.5 21 21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </form>
+
+        <div class="results">
+          <p class="results__meta" id="meta">Showing <strong>0</strong> result(s).</p>
+          <div class="list" id="list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <span class="footer__muted">School Search • HTML / PHP / CSS</span>
+    </div>
+  </footer>
+
+  <script>
+    const tabs = document.querySelectorAll('[data-tab]');
+    const form = document.getElementById('searchForm');
+    const qInput = document.getElementById('q');
+    const list = document.getElementById('list');
+    const meta = document.getElementById('meta');
+    const titleText = document.getElementById('titleText');
+    const hintText = document.getElementById('hintText');
+
+    let activeTab = 'students';
+
+    function setTab(tab) {
+      activeTab = tab;
+      tabs.forEach(b => b.classList.toggle('tab--active', b.dataset.tab === tab));
+
+      if (tab === 'students') {
+        titleText.textContent = 'Search for a Student';
+        hintText.textContent = 'Search by code, last name, first name or major...';
+        qInput.placeholder = 'Enter code, last name, first name or major...';
+      } else if (tab === 'subjects') {
+        titleText.textContent = 'Search for a Subject';
+        hintText.textContent = 'Search by code, subject name or department...';
+        qInput.placeholder = 'Enter code, subject name or department...';
+      } else {
+        titleText.textContent = 'Search for a Result';
+        hintText.textContent = 'Search by student code, subject or score...';
+        qInput.placeholder = 'Enter student code, subject or score...';
+      }
+
+      runSearch();
+    }
+
+    async function runSearch() {
+      const q = qInput.value.trim();
+      const res = await fetch(`search.php?tab=${encodeURIComponent(activeTab)}&q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+
+      meta.innerHTML = `Showing <strong>${data.count}</strong> result(s)` + (q ? ` for <strong>${escapeHtml(q)}</strong>.` : '.');
+      list.innerHTML = '';
+
+      if (!data.items.length) {
+        list.innerHTML = `
+          <div class="item">
+            <div>
+              <p class="item__title">No results</p>
+              <p class="item__sub">Try a different keyword.</p>
+            </div>
+            <span class="badge badge--warn">Empty</span>
+          </div>`;
+        return;
+      }
+
+      for (const it of data.items) {
+        list.insertAdjacentHTML('beforeend', `
+          <div class="item">
+            <div>
+              <p class="item__title">${escapeHtml(it.title)}</p>
+              <p class="item__sub">${escapeHtml(it.sub)}</p>
+            </div>
+            <span class="badge">${escapeHtml(it.badge)}</span>
+          </div>
+        `);
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    tabs.forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+    form.addEventListener('submit', (e) => { e.preventDefault(); runSearch(); });
+
+    setTab('students');
+  </script>
+</body>
+</html>
