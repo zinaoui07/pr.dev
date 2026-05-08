@@ -1,0 +1,175 @@
+<!--
+  معاينة HTML ثابتة — ملف مستقل.
+  النسخة الديناميكية: ranking.php | التنسيق: ranking.css
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Classement des étudiants</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="ranking.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <div class="brand" aria-label="School app">
+        <span class="brand__dot" aria-hidden="true"></span>
+     
+      </div>
+      <nav class="nav" aria-label="Primary">
+        <a class="nav__item" href="index.php">Home</a>
+        <a class="nav__item" href="students.php">Students</a>
+        <a class="nav__item" href="subjects.php">Subjects</a>
+        <a class="nav__item" href="results.php">Results</a>
+        <a class="nav__item" href="index.php">Search</a>
+        <a class="nav__item nav__item--active" href="ranking.html" aria-current="page">Rankings</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page">
+    <div class="pageHead">
+      <div>
+        <h1 class="pageTitle"><span class="pageTitle__ico" aria-hidden="true">🎓</span>Student Rankings</h1>
+        <p class="pageSubtitle">Classement par moyenne générale (filtre année &amp; filière)</p>
+      </div>
+    </div>
+
+    <section class="card">
+      <form class="filterBar" method="get" action="ranking.php">
+        <label class="field">
+          <span class="field__label"><span class="field__ico" aria-hidden="true">📅</span>Year</span>
+          <select class="input input--select" name="year">
+            <option value="All" selected>All</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field__label"><span class="field__ico" aria-hidden="true">📚</span>Filière</span>
+          <select class="input input--select" name="filiere">
+            <option value="All" selected>All</option>
+            <option value="Science">Science</option>
+            <option value="Literature">Literature</option>
+          </select>
+        </label>
+        <div></div>
+        <div class="filterBar__actions">
+          <button class="btn btn--apply" type="submit"><span aria-hidden="true">🔍</span> Apply filters</button>
+          <a class="btn btn--reset" href="ranking.html"><span aria-hidden="true">↺</span> Reset</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="kpiGrid" aria-label="Synthèse">
+      <article class="kpi">
+        <div class="kpi__value">3</div>
+        <div class="kpi__label">Total participants</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi__value">15.50</div>
+        <div class="kpi__label">Moyenne de classe</div>
+      </article>
+      <article class="kpi">
+        <div class="kpi__value">16.80</div>
+        <div class="kpi__label">Meilleure moyenne</div>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="cardHead">
+        <div>
+          <h2 class="cardHead__title"><span aria-hidden="true">🏆 </span>Rankings list</h2>
+          <p class="cardHead__sub">Showing 3 student(s) — sorted by average (desc)</p>
+        </div>
+      </div>
+
+      <div class="tableWrap" tabindex="0" role="region" aria-label="Tableau des classements">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Student code</th>
+              <th>Last name</th>
+              <th>First name</th>
+              <th>Year</th>
+              <th>Filière</th>
+              <th class="table__num">Final avg</th>
+              <th>Honors</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="table__rank"><span class="rank"><span class="rank__medal" aria-hidden="true">🥇</span><span>1</span></span></td>
+              <td><span class="mono">E003</span></td>
+              <td>Williams</td>
+              <td>Sophia</td>
+              <td><span class="badge badge--year">3rd Year</span></td>
+              <td><span class="badge badge--fil">Literature</span></td>
+              <td class="table__num"><span class="grade">16.80</span><span class="grade__muted"> / 20</span></td>
+              <td><span class="pill pill--summa">Summa Cum Laude</span></td>
+            </tr>
+            <tr>
+              <td class="table__rank"><span class="rank"><span class="rank__medal" aria-hidden="true">🥈</span><span>2</span></span></td>
+              <td><span class="mono">E001</span></td>
+              <td>Smith</td>
+              <td>Emma</td>
+              <td><span class="badge badge--year">2nd Year</span></td>
+              <td><span class="badge badge--fil">Science</span></td>
+              <td class="table__num"><span class="grade">15.50</span><span class="grade__muted"> / 20</span></td>
+              <td><span class="pill pill--magna">Magna Cum Laude</span></td>
+            </tr>
+            <tr>
+              <td class="table__rank"><span class="rank"><span class="rank__medal" aria-hidden="true">🥉</span><span>3</span></span></td>
+              <td><span class="mono">E002</span></td>
+              <td>Johnson</td>
+              <td>Michael</td>
+              <td><span class="badge badge--year">2nd Year</span></td>
+              <td><span class="badge badge--fil">Science</span></td>
+              <td class="table__num"><span class="grade">14.20</span><span class="grade__muted"> / 20</span></td>
+              <td><span class="pill pill--magna">Magna Cum Laude</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tableWrap podiumWrap">
+        <div class="podiumGrid" aria-label="Top 3">
+          <article class="podiumCard podiumCard--1">
+            <div class="podiumCard__icon" aria-hidden="true">🥇</div>
+            <div class="podiumCard__place">1st place</div>
+            <div class="podiumCard__name">Sophia Williams</div>
+            <div class="podiumCard__avg">16.80</div>
+            <div class="podiumCard__meta">3rd Year • Literature</div>
+          </article>
+          <article class="podiumCard podiumCard--2">
+            <div class="podiumCard__icon" aria-hidden="true">🥈</div>
+            <div class="podiumCard__place">2nd place</div>
+            <div class="podiumCard__name">Emma Smith</div>
+            <div class="podiumCard__avg">15.50</div>
+            <div class="podiumCard__meta">2nd Year • Science</div>
+          </article>
+          <article class="podiumCard podiumCard--3">
+            <div class="podiumCard__icon" aria-hidden="true">🥉</div>
+            <div class="podiumCard__place">3rd place</div>
+            <div class="podiumCard__name">Michael Johnson</div>
+            <div class="podiumCard__avg">14.20</div>
+            <div class="podiumCard__meta">2nd Year • Science</div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <span class="footer__muted">Static HTML — الديناميك: <strong>ranking.php</strong> | التنسيق: <strong>ranking.css</strong></span>
+    </div>
+  </footer>
+</body>
+</html>
+
