@@ -1,250 +1,393 @@
 <?php
-declare(strict_types=1);
-
 
 $students = [
-    ['code' => 'E003', 'first_name' => 'Sophia',  'last_name' => 'Williams', 'year' => '3rd Year', 'major' => 'Literature', 'average' => 16.80],
-    ['code' => 'E001', 'first_name' => 'Emma',    'last_name' => 'Smith',    'year' => '2nd Year', 'major' => 'Science',    'average' => 15.50],
-    ['code' => 'E002', 'first_name' => 'Michael', 'last_name' => 'Johnson',  'year' => '2nd Year', 'major' => 'Science',    'average' => 14.20],
+    [
+        'code' => 'E003',
+        'first_name' => 'Sophia',
+        'last_name' => 'Williams',
+        'year' => '3rd Year',
+        'major' => 'Literature',
+        'average' => 16.80
+    ],
+
+    [
+        'code' => 'E001',
+        'first_name' => 'Emma',
+        'last_name' => 'Smith',
+        'year' => '2nd Year',
+        'major' => 'Science',
+        'average' => 15.50
+    ],
+
+    [
+        'code' => 'E002',
+        'first_name' => 'Michael',
+        'last_name' => 'Johnson',
+        'year' => '2nd Year',
+        'major' => 'Science',
+        'average' => 14.20
+    ]
 ];
 
-function honorsLabel(float $avg): ?string
+
+
+function honorsLabel($avg)
 {
-    if ($avg >= 16.0) return 'Summa Cum Laude';
-    if ($avg >= 14.0) return 'Magna Cum Laude';
-    if ($avg >= 12.0) return 'Cum Laude';
+    if ($avg >= 16.0) {
+        return 'Summa Cum Laude';
+    }
+
+    if ($avg >= 14.0) {
+        return 'Magna Cum Laude';
+    }
+
+    if ($avg >= 12.0) {
+        return 'Cum Laude';
+    }
+
     return null;
 }
 
-function honorsClass(float $avg): string
+
+
+function honorsClass($avg)
 {
-    if ($avg >= 16.0) return 'pill pill--summa';
-    if ($avg >= 14.0) return 'pill pill--magna';
-    if ($avg >= 12.0) return 'pill pill--cum';
+    if ($avg >= 16.0) {
+        return 'pill pill--summa';
+    }
+
+    if ($avg >= 14.0) {
+        return 'pill pill--magna';
+    }
+
+    if ($avg >= 12.0) {
+        return 'pill pill--cum';
+    }
+
     return 'pill pill--none';
 }
 
-function medal(int $rank): string
+
+
+function medal($rank)
 {
-    return match ($rank) {
-        1 => '🥇',
-        2 => '🥈',
-        3 => '🥉',
-        default => '🏅',
-    };
+    switch ($rank) {
+
+        case 1:
+            return '🥇';
+
+        case 2:
+            return '🥈';
+
+        case 3:
+            return '🥉';
+
+        default:
+            return '🏅';
+    }
 }
 
-$majors = array_values(array_unique(array_map(static fn($s) => (string)$s['major'], $students)));
-sort($majors, SORT_NATURAL | SORT_FLAG_CASE);
-$years = array_values(array_unique(array_map(static fn($s) => (string)$s['year'], $students)));
-sort($years, SORT_NATURAL | SORT_FLAG_CASE);
 
-$selectedMajor = isset($_GET['major']) ? trim((string)$_GET['major']) : 'All';
-$selectedYear = isset($_GET['year']) ? trim((string)$_GET['year']) : 'All';
 
-if ($selectedMajor !== 'All' && !in_array($selectedMajor, $majors, true)) $selectedMajor = 'All';
-if ($selectedYear !== 'All' && !in_array($selectedYear, $years, true)) $selectedYear = 'All';
+/* majors */
 
-$filtered = array_values(array_filter($students, static function (array $s) use ($selectedMajor, $selectedYear): bool {
-    if ($selectedMajor !== 'All' && $s['major'] !== $selectedMajor) return false;
-    if ($selectedYear !== 'All' && $s['year'] !== $selectedYear) return false;
-    return true;
-}));
+$tempMajors = array();
 
-usort($filtered, static fn($a, $b) => $b['average'] <=> $a['average']);
+foreach ($students as $s) {
+    $tempMajors[] = $s['major'];
+}
+
+$majors = array_unique($tempMajors);
+sort($majors);
+
+
+
+/* years */
+
+$tempYears = array();
+
+foreach ($students as $s) {
+    $tempYears[] = $s['year'];
+}
+
+$years = array_unique($tempYears);
+sort($years);
+
+
+
+/* filters */
+
+$selectedMajor = 'All';
+$selectedYear = 'All';
+
+if (isset($_GET['major'])) {
+    $selectedMajor = trim($_GET['major']);
+}
+
+if (isset($_GET['year'])) {
+    $selectedYear = trim($_GET['year']);
+}
+
+
+
+/* filtering */
+
+$filtered = array();
+
+foreach ($students as $s) {
+
+    if ($selectedMajor != 'All' && $s['major'] != $selectedMajor) {
+        continue;
+    }
+
+    if ($selectedYear != 'All' && $s['year'] != $selectedYear) {
+        continue;
+    }
+
+    $filtered[] = $s;
+}
+
+
+
+/* sorting */
+
+usort($filtered, function ($a, $b) {
+
+    if ($a['average'] == $b['average']) {
+        return 0;
+    }
+
+    return ($a['average'] < $b['average']) ? 1 : -1;
+});
+
+
+
+/* statistics */
 
 $totalStudents = count($filtered);
-$overallAverage = $totalStudents > 0
-    ? array_sum(array_map(static fn($s) => (float)$s['average'], $filtered)) / $totalStudents
-    : 0.0;
-$passed = count(array_filter($filtered, static fn($s) => (float)$s['average'] >= 10.0));
+
+$overallAverage = 0;
+
+if ($totalStudents > 0) {
+
+    $sum = 0;
+
+    foreach ($filtered as $s) {
+        $sum += $s['average'];
+    }
+
+    $overallAverage = $sum / $totalStudents;
+}
+
+
+
+$passed = 0;
+
+foreach ($filtered as $s) {
+
+    if ($s['average'] >= 10) {
+        $passed++;
+    }
+}
+
 $failed = $totalStudents - $passed;
 
+
+
 $top3 = array_slice($filtered, 0, 3);
+
 ?>
+
 <!doctype html>
+
 <html lang="en">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Student Rankings</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./ranking.css" />
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Student Rankings</title>
+
+<link rel="stylesheet" href="ranking.css">
+
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="container topbar__inner">
-      <div class="brand" aria-label="School app">
-        <span class="brand__dot" aria-hidden="true"></span>
-        <span class="brand__text">School</span>
-      </div>
-      <nav class="nav" aria-label="Primary">
-        <a class="nav__item" href="./index.php">Home</a>
-        <a class="nav__item" href="./students.php">Students</a>
-        <a class="nav__item" href="./subjects.php">Subjects</a>
-        <a class="nav__item" href="./results.php">Results</a>
-        <a class="nav__item" href="./search.php">Search</a>
-        <a class="nav__item nav__item--active" href="./ranking.php" aria-current="page">Rankings</a>
-      </nav>
-    </div>
-  </header>
 
-  <main class="container page">
-    <div class="pageHead">
-      <div>
-        <h1 class="pageTitle">Student Rankings</h1>
-        <p class="pageSubtitle">Rankings by overall average</p>
-      </div>
-    </div>
+<h1>Student Rankings</h1>
 
-    <section class="kpiGrid" aria-label="Summary">
-      <article class="kpi kpi--students">
-        <div class="kpi__label">Total Students</div>
-        <div class="kpi__value"><?= (int)$totalStudents ?></div>
-      </article>
-      <article class="kpi kpi--avg">
-        <div class="kpi__label">Overall Average</div>
-        <div class="kpi__value"><?= number_format((float)$overallAverage, 2) ?></div>
-      </article>
-      <article class="kpi kpi--pass">
-        <div class="kpi__label">Passed (≥ 10)</div>
-        <div class="kpi__value"><?= (int)$passed ?></div>
-      </article>
-      <article class="kpi kpi--fail">
-        <div class="kpi__label">Failed (&lt; 10)</div>
-        <div class="kpi__value"><?= (int)$failed ?></div>
-      </article>
-    </section>
 
-    <section class="card">
-      <div class="cardHead">
-        <div>
-          <h2 class="cardHead__title">Filters</h2>
-          <p class="cardHead__sub">Filter rankings by year and major</p>
-        </div>
-      </div>
 
-      <form class="filterBar" method="get" action="./ranking.php">
-        <label class="field">
-          <span class="field__label">Major</span>
-          <select class="input input--select" name="major">
-            <option value="All" <?= $selectedMajor === 'All' ? 'selected' : '' ?>>All</option>
-            <?php foreach ($majors as $m): ?>
-              <option value="<?= htmlspecialchars($m) ?>" <?= $selectedMajor === $m ? 'selected' : '' ?>>
-                <?= htmlspecialchars($m) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </label>
+<h2>Statistics</h2>
 
-        <label class="field">
-          <span class="field__label">Year</span>
-          <select class="input input--select" name="year">
-            <option value="All" <?= $selectedYear === 'All' ? 'selected' : '' ?>>All</option>
-            <?php foreach ($years as $y): ?>
-              <option value="<?= htmlspecialchars($y) ?>" <?= $selectedYear === $y ? 'selected' : '' ?>>
-                <?= htmlspecialchars($y) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </label>
+<ul>
+    <li>Total Students: <?php echo $totalStudents; ?></li>
 
-        <div class="filterBar__actions">
-          <button class="btn btn--accent" type="submit">Apply Filters</button>
-          <a class="btn btn--ghost" href="./ranking.php">Reset</a>
-        </div>
-      </form>
-    </section>
+    <li>
+        Overall Average:
+        <?php echo number_format($overallAverage, 2); ?>
+    </li>
 
-    <section class="card">
-      <div class="cardHead">
-        <div>
-          <h2 class="cardHead__title">Rankings list</h2>
-          <p class="cardHead__sub">Showing <?= (int)$totalStudents ?> student(s) — sorted by average (desc)</p>
-        </div>
-      </div>
+    <li>Passed: <?php echo $passed; ?></li>
 
-      <div class="tableWrap">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Code</th>
-              <th>Last Name</th>
-              <th>First Name</th>
-              <th>Year</th>
-              <th>Major</th>
-              <th class="table__num">Average</th>
-              <th>Honors</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php if (!$filtered): ?>
-              <tr>
-                <td colspan="8" class="table__empty">No students match the current filters.</td>
-              </tr>
-            <?php else: ?>
-              <?php foreach ($filtered as $i => $s): ?>
-                <?php
-                  $rank = $i + 1;
-                  $hon = honorsLabel((float)$s['average']);
-                ?>
-                <tr>
-                  <td class="table__rank">
-                    <span class="rank">
-                      <span class="rank__medal" aria-hidden="true"><?= htmlspecialchars(medal($rank)) ?></span>
-                      <span><?= (int)$rank ?></span>
-                    </span>
-                  </td>
-                  <td><span class="mono"><?= htmlspecialchars((string)$s['code']) ?></span></td>
-                  <td><?= htmlspecialchars((string)$s['last_name']) ?></td>
-                  <td><?= htmlspecialchars((string)$s['first_name']) ?></td>
-                  <td><span class="badge badge--year"><?= htmlspecialchars((string)$s['year']) ?></span></td>
-                  <td><span class="badge badge--major"><?= htmlspecialchars((string)$s['major']) ?></span></td>
-                  <td class="table__num">
-                    <span class="grade"><?= number_format((float)$s['average'], 2) ?></span>
-                    <span class="grade__muted"> / 20</span>
-                  </td>
-                  <td>
-                    <?php if ($hon): ?>
-                      <span class="<?= htmlspecialchars(honorsClass((float)$s['average'])) ?>"><?= htmlspecialchars($hon) ?></span>
-                    <?php else: ?>
-                      <span class="pill pill--none">—</span>
-                    <?php endif; ?>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            <?php endif; ?>
-          </tbody>
-        </table>
-      </div>
+    <li>Failed: <?php echo $failed; ?></li>
+</ul>
 
-      <?php if ($top3): ?>
-        <div class="podiumWrap">
-          <div class="podiumGrid" aria-label="Top 3">
-            <?php
-              $slots = [
-                1 => $top3[0] ?? null,
-                2 => $top3[1] ?? null,
-                3 => $top3[2] ?? null,
-              ];
-            ?>
-            <?php foreach ($slots as $place => $st): ?>
-              <?php if (!$st) continue; ?>
-              <article class="podiumCard podiumCard--<?= (int)$place ?>">
-                <div class="podiumCard__icon" aria-hidden="true"><?= htmlspecialchars(medal($place)) ?></div>
-                <div class="podiumCard__place"><?= (int)$place ?><?= $place === 1 ? 'st' : ($place === 2 ? 'nd' : 'rd') ?> Place</div>
-                <div class="podiumCard__name"><?= htmlspecialchars((string)$st['first_name'] . ' ' . (string)$st['last_name']) ?></div>
-                <div class="podiumCard__avg"><?= number_format((float)$st['average'], 2) ?></div>
-                <div class="podiumCard__meta"><?= htmlspecialchars((string)$st['year'] . ' • ' . (string)$st['major']) ?></div>
-              </article>
-            <?php endforeach; ?>
-          </div>
-        </div>
-      <?php endif; ?>
-    </section>
-  </main>
+
+
+<h2>Filters</h2>
+
+<form method="get">
+
+    <label>Major</label>
+
+    <select name="major">
+
+        <option value="All">All</option>
+
+        <?php foreach ($majors as $m) { ?>
+
+            <option value="<?php echo $m; ?>">
+
+                <?php echo $m; ?>
+
+            </option>
+
+        <?php } ?>
+
+    </select>
+
+
+
+    <label>Year</label>
+
+    <select name="year">
+
+        <option value="All">All</option>
+
+        <?php foreach ($years as $y) { ?>
+
+            <option value="<?php echo $y; ?>">
+
+                <?php echo $y; ?>
+
+            </option>
+
+        <?php } ?>
+
+    </select>
+
+
+
+    <button type="submit">Apply Filters</button>
+
+</form>
+
+
+
+<h2>Ranking List</h2>
+
+<table border="1" cellpadding="10">
+    <tr>
+    <th>Rank</th>
+    <th>Code</th>
+    <th>Last Name</th>
+    <th>First Name</th>
+    <th>Year</th>
+    <th>Major</th>
+    <th>Average</th>
+    <th>Honors</th>
+</tr>
+
+<?php if (count($filtered) == 0) { ?>
+
+<tr>
+    <td colspan="8">No students found</td>
+</tr>
+
+<?php } else { ?>
+
+<?php foreach ($filtered as $i => $s) { ?>
+
+<?php
+$rank = $i + 1;
+$hon = honorsLabel($s['average']);
+?>
+
+<tr>
+
+<td>
+    <?php echo medal($rank); ?>
+    <?php echo $rank; ?>
+</td>
+
+<td><?php echo $s['code']; ?></td>
+
+<td><?php echo $s['last_name']; ?></td>
+
+<td><?php echo $s['first_name']; ?></td>
+
+<td><?php echo $s['year']; ?></td>
+
+<td><?php echo $s['major']; ?></td>
+
+<td>
+    <?php echo number_format($s['average'], 2); ?>
+</td>
+
+<td>
+
+<?php
+
+if ($hon) {
+    echo $hon;
+} else {
+    echo '-';
+}
+
+?>
+
+</td>
+
+</tr>
+
+<?php } ?>
+
+<?php } ?>
+
+</table>
+
+
+
+<h2>Top 3 Students</h2>
+
+<?php foreach ($top3 as $i => $st) { ?>
+
+<div style="margin-bottom:15px; padding:10px; border:1px solid #ccc;">
+
+    <h3>
+        <?php echo medal($i + 1); ?>
+
+        Place <?php echo $i + 1; ?>
+    </h3>
+
+    <p>
+
+        <?php echo $st['first_name']; ?>
+        <?php echo $st['last_name']; ?>
+
+    </p>
+
+    <p>
+        Average:
+        <?php echo number_format($st['average'], 2); ?>
+    </p>
+
+</div>
+
+<?php } ?>
+
 </body>
 </html>
